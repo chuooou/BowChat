@@ -1,11 +1,44 @@
-type ButtonVariant = "primary" | "secondary" | "danger";
-type ButtonSize = "sm" | "md" | "lg";
+import { cva, type VariantProps } from "class-variance-authority";
+import type { ComponentPropsWithoutRef } from "react";
 
-type ButtonProps = React.ComponentPropsWithoutRef<"button"> & {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  isLoading?: boolean;
-};
+import { cn } from "@/shared/lib/cn";
+
+const buttonVariants = cva(
+  [
+    "inline-flex items-center justify-center",
+    "rounded-button font-semibold transition-colors",
+    "focus-visible:outline-none",
+    "focus-visible:ring-2",
+    "focus-visible:ring-primary",
+    "focus-visible:ring-offset-2",
+    "disabled:pointer-events-none",
+    "disabled:opacity-50",
+  ],
+  {
+    variants: {
+      variant: {
+        primary: "bg-primary text-white hover:bg-primary-hover",
+        secondary: "border border-border bg-white text-text-primary hover:bg-surface-muted",
+        danger: "bg-danger text-white hover:opacity-90",
+      },
+      size: {
+        sm: "h-9 px-3 text-sm",
+        md: "h-11 px-4 text-sm",
+        lg: "h-12 px-5 text-base",
+      },
+    },
+    defaultVariants: {
+      variant: "primary",
+      size: "md",
+    },
+  },
+);
+
+type ButtonProps = ComponentPropsWithoutRef<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    isLoading?: boolean;
+    loadingText?: string;
+  };
 
 export function Button({
   variant = "primary",
@@ -13,11 +46,24 @@ export function Button({
   isLoading = false,
   disabled,
   children,
+  className,
+  type = "button",
   ...props
 }: ButtonProps) {
   return (
-    <button disabled={disabled || isLoading} data-variant={variant} data-size={size} {...props}>
-      {isLoading ? "처리 중..." : children}
+    <button
+      type={type}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading || undefined}
+      className={cn(buttonVariants({ variant, size }), className)}
+      {...props}
+    >
+      {isLoading ? "..." : children}
     </button>
   );
 }
+
+// * 버튼에 아이콘만 표시할 경우 아래와 같은 속성 추가
+// <Button aria-label="관심 경매">
+//   <HeartIcon aria-hidden="true" />
+// </Button>
