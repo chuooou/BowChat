@@ -5,9 +5,11 @@ const RootLayout = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <Link to="/" className="text-xl font-bold">
-            BowChat
-          </Link>
+          <h1>
+            <Link to="/" className="text-xl font-bold">
+              BowChat
+            </Link>
+          </h1>
 
           <nav className="flex items-center gap-4">
             <Link to="/">경매</Link>
@@ -18,7 +20,7 @@ const RootLayout = () => {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-6">
+      <main className="mx-auto w-full">
         <Outlet />
       </main>
     </div>

@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import RootLayout from "@/app/layouts/RootLayout";
+import { authRoutes } from "@/app/router/authRoutes";
 import AuctionList from "@/pages/AuctionList";
 import NotFound from "@/pages/NotFound";
 
@@ -14,9 +15,10 @@ export const router = createBrowserRouter([
         element: <AuctionList />,
       },
       {
-       path:"*",
+        path: "*",
         element: <NotFound />,
       },
     ],
   },
+  authRoutes,
 ]);

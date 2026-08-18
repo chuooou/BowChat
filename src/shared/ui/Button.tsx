@@ -18,11 +18,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary: "bg-primary text-white hover:bg-primary-hover",
-        secondary: "border border-border bg-white text-text-primary hover:bg-surface-muted",
+        black: "bg-dark text-white hover:bg-dark-soft",
+        gray: "bg-gray text-gray hover:bg-dark-soft",
+        white: "bg-white text-gray",
         danger: "bg-danger text-white hover:opacity-90",
       },
       size: {
-        sm: "h-9 px-3 text-sm",
+        sm: "px-[1.6rem] py-[1.1rem] text-sm",
         md: "h-11 px-4 text-sm",
         lg: "h-12 px-5 text-base",
       },

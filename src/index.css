@@ -1,27 +1,22 @@
 @import "tailwindcss";
 
-
 @theme {
-  --color-primary: #ff4d2e;
-  --color-primary-hover: #e84429;
-  --color-primary-light: #ffe7e0;
-
-  --color-dark: #14171f;
-  --color-dark-soft: #232731;
-
+  --color-bg-primary: #ff4d2e;
+  --color-bg-primary-hover: #e84429;
+  --color-bg-primary-light: #ffe7e0;
   --color-background: #fff;
-  --color-gray: #eeede9;
-  --color-dark-gray: #5B6270;
-  --color-black: #14171F;
+  --color-bg-gray: #eeede9;
+  --color-bg-dark-gray: #5b6270;
+  --color-bg-dark-soft: #232731;
+  --color-bg-black: #14171f;
 
-  --color-text-primary: #14171F;
-  --color-text-gray: #5B6270;
-  --color-text-light-gray: #9198A3;
-  --color-text-muted: #a5a7ad;
-  --color-text-white: #ffffff;
-  --color-text-danger: #FF4D2E;
+  --color-primary: #14171f;
+  --color-gray: #5b6270;
+  --color-light-gray: #9198a3;
+  --color-muted: #a5a7ad;
+  --color-white: #ffffff;
+  --color-danger: #ff4d2e;
 
-  /* 모서리 */
   --radius-card: 8px;
   --radius-input: 10px;
   --radius-button: 12px;
@@ -29,14 +24,7 @@
   --radius-2xl: 16px;
   --radius-3xl: 18px;
 
-  /* 글꼴 */
-  --font-sans:
-    Pretendard,
-    "Pretendard Variable",
-    -apple-system,
-    Roboto,
-    "Noto Sans KR",
-    sans-serif;
+  --font-sans: Pretendard, "Pretendard Variable", -apple-system, Roboto, "Noto Sans KR", sans-serif;
 }
 
 :root {
@@ -58,11 +46,13 @@
 
 html {
   min-height: 100%;
+  font-size: 62.5%;
 }
 
 body {
-  color: var(--color-text-primary);
   min-height: 100vh;
+  font-size: 1.6rem;
+  color: var(--color-text-primary);
   margin: 0;
   background-color: var(--color-background);
 }
