@@ -1,35 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-primary: #ff4d2e;
-  --color-bg-primary-hover: #e84429;
-  --color-bg-primary-light: #ffe7e0;
-  --color-background: #fff;
-  --color-bg-gray: #eeede9;
-  --color-bg-dark-gray: #5b6270;
-  --color-bg-dark-soft: #232731;
-  --color-bg-black: #14171f;
+  /* Brand */
+  --color-primary: #ff4d2e;
+  --color-primary-hover: #e84429;
+  --color-primary-light: #ffe7e0;
 
-  --color-primary: #14171f;
+  --color-background: #ffffff;
+  --color-surface: #eeede9;
+
+  --color-dark: #14171f;
+  --color-dark-soft: #232731;
+
   --color-gray: #5b6270;
   --color-light-gray: #9198a3;
   --color-muted: #a5a7ad;
-  --color-white: #ffffff;
+
   --color-danger: #ff4d2e;
 
   --radius-card: 8px;
   --radius-input: 10px;
   --radius-button: 12px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
-  --radius-3xl: 18px;
 
   --font-sans: Pretendard, "Pretendard Variable", -apple-system, Roboto, "Noto Sans KR", sans-serif;
 }
 
 :root {
   font-family: var(--font-sans);
-  color: var(--color-text-primary);
+  color: var(--color-dark);
   background-color: var(--color-background);
 
   font-synthesis: none;
@@ -52,16 +50,9 @@ html {
 body {
   min-height: 100vh;
   font-size: 1.6rem;
-  color: var(--color-text-primary);
+  color: var(--color-dark);
   margin: 0;
   background-color: var(--color-background);
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
 }
 
 button {

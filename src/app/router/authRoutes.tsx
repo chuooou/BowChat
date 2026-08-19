@@ -2,6 +2,7 @@ import type { RouteObject } from "react-router-dom";
 
 import AuthLayout from "@/app/layouts/AuthLayout";
 import Login from "@/pages/Login";
+import SignUp from "@/pages/SignUp";
 
 export const authRoutes: RouteObject = {
   element: <AuthLayout />,
@@ -12,7 +13,7 @@ export const authRoutes: RouteObject = {
     },
     {
       path: "signup",
-      // element: <Signup />,
+      element: <SignUp />,
     },
   ],
 };

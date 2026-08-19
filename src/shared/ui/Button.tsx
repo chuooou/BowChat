@@ -5,6 +5,7 @@ import { cn } from "@/shared/lib/cn";
 
 const buttonVariants = cva(
   [
+    "text-[1.3rem]",
     "inline-flex items-center justify-center",
     "rounded-button font-semibold transition-colors",
     "focus-visible:outline-none",
@@ -17,16 +18,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary text-white hover:bg-primary-hover",
-        black: "bg-dark text-white hover:bg-dark-soft",
-        gray: "bg-gray text-gray hover:bg-dark-soft",
-        white: "bg-white text-gray",
-        danger: "bg-danger text-white hover:opacity-90",
+        primary: "bg-primary text-background hover:bg-primary-hover",
+        black: "bg-dark text-background hover:bg-dark-soft",
+        gray: "bg-surface text-gray hover:bg-dark-soft hover:text-background",
+        white: "bg-background text-gray border border-muted hover:bg-dark-soft hover:text-white",
+        danger: "bg-danger text-background hover:opacity-90",
       },
       size: {
-        sm: "px-[1.6rem] py-[1.1rem] text-sm",
-        md: "h-11 px-4 text-sm",
-        lg: "h-12 px-5 text-base",
+        sm: "px-[1.4rem] py-[1.1rem]",
+        md: "h-[4.2rem] px-[1rem]",
+        lg: "h-12 px-5",
       },
     },
     defaultVariants: {
@@ -60,7 +61,7 @@ export function Button({
       className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     >
-      {isLoading ? "..." : children}
+      {isLoading ? "확인 중..." : children}
     </button>
   );
 }
