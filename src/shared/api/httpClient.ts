@@ -1,12 +1,15 @@
 import axios from "axios";
 
-const http = axios.create({
+const config = {
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   //   headers: {
   //     "Content-Type": "application/json",
   //   },
-});
+};
+
+const publicHttp = axios.create(config);
+const http = axios.create(config);
 
 http.interceptors.request.use(
   (config) => {
@@ -25,14 +28,19 @@ http.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // 인증 만료 공통 처리
-      // 예: 토큰 갱신 요청 ->
-      // 1. 토큰 발급 -> 정상 동작
-      // 2. 토큰 미발급 -> 로그인 페이지로 리다이렉트
+      // refresh token으로 재발급 요청
+      // 성공 → 새 access token 저장 → 기존 요청 한 번 재시도 / 다시 401이면 실패 처리
+      // 실패 → 저장 정보 제거 → /login 이동
+      //       if (error.response?.status === 401 && !originalRequest._retry) {
+      //   originalRequest._retry = true;
+      //   const newAccessToken = await refreshAccessToken();
+      //   originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      //   return http(originalRequest);
+      // }
     }
 
     return Promise.reject(error);
   },
 );
 
-export default http;
+export { http, publicHttp };

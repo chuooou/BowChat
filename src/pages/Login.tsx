@@ -2,7 +2,12 @@ import { Link } from "react-router-dom";
 
 import { Button } from "@/shared/ui/Button";
 import CheckBox from "@/shared/ui/CheckBox";
-import { Input } from "@/shared/ui/Input";
+import { Input, PasswordInput } from "@/shared/ui/Input";
+
+// 로그인 api 호출 -> 성공 후 메인 -> 실패시 에러 토스트
+// 자동 로그인 체크: 두 토큰을 localStorage
+// 자동 로그인 미체크: 두 토큰을 sessionStorage
+// userInfo:  React Query
 
 const Login = () => {
   return (
@@ -23,12 +28,7 @@ const Login = () => {
           >
             비밀번호
           </label>
-          <Input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="비밀번호를 입력해주세요"
-          />
+          <PasswordInput id="password" name="password" placeholder="비밀번호를 입력해주세요" />
         </div>
         <div className="mt-[1.6rem] flex items-center justify-between">
           <div className="text-gray flex items-center gap-[0.8rem] text-[1.3rem] font-medium">
