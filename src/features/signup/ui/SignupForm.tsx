@@ -50,25 +50,24 @@ const SignupForm = () => {
       return;
     }
 
-    signupMutation.mutate(
-      {
-        email: data.email,
-        password: data.password,
-        nickName: data.nickname,
+    const payload = {
+      email: data.email,
+      password: data.password,
+      nickName: data.nickname,
+    };
+
+    signupMutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success("회원가입이 완료되었습니다.");
+        navigate("/login");
       },
-      {
-        onSuccess: () => {
-          toast.success("회원가입이 완료되었습니다.");
-          navigate("/login");
-        },
-        onError: (error) => {
-          console.log(error);
-          if (error instanceof Error) {
-            toast.error("회원가입에 실패했습니다.");
-          }
-        },
+      onError: (error) => {
+        console.log(error);
+        if (error instanceof Error) {
+          toast.error("회원가입에 실패했습니다.");
+        }
       },
-    );
+    });
   };
 
   return (

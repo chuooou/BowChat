@@ -1,49 +1,20 @@
-import { useFormContext, useFormState, useWatch } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-import { useCheckNicknameMutation } from "@/features/signup/api/useCheckNicknameMutation";
+import { checkNicknameDuplicate } from "@/features/signup/api/signupApi";
+import { useDuplicateCheck } from "@/features/signup/api/useDuplicateCheck";
 import type { SignupFormValues } from "@/features/signup/model/signupSchema";
 import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
 
 const NicknameField = () => {
   const form = useFormContext<SignupFormValues>();
-  const nickname = useWatch({ name: "nickname" });
-  const isNicknameVerified = nickname !== "" && nickname === form.getValues("verifiedNickname");
-  const { errors } = useFormState<SignupFormValues>({
+  const { error, isVerified, isPending, handleDuplicateCheck } = useDuplicateCheck({
     name: "nickname",
+    verifiedName: "verifiedNickname",
+    mutationFn: checkNicknameDuplicate,
+    duplicateMessage: "이미 사용 중인 닉네임입니다.",
+    requestErrorMessage: "닉네임 중복확인 요청에 실패했습니다. 잠시 후 다시 시도해주세요.",
   });
-
-  const nicknameCheckMutation = useCheckNicknameMutation();
-
-  const handleNicknameDuplicateCheck = async () => {
-    const isValid = await form.trigger("nickname");
-
-    if (!isValid) return;
-
-    nicknameCheckMutation.mutate(nickname, {
-      onSuccess: (data) => {
-        if (form.getValues("nickname") !== nickname) return;
-
-        if (!data.available) {
-          form.setError("nickname", {
-            type: "server",
-            message: "이미 사용 중인 닉네임입니다.",
-          });
-
-          return;
-        }
-
-        form.clearErrors("nickname");
-        form.setValue("verifiedNickname", nickname);
-      },
-      onError: () => {
-        form.setError("nickname", {
-          type: "server",
-          message: "닉네임 중복확인 요청에 실패했습니다. 잠시 후 다시 시도해주세요.",
-        });
-      },
-    });
-  };
 
   return (
     <div className="mt-[1.6rem]">
@@ -56,24 +27,22 @@ const NicknameField = () => {
           {...form.register("nickname")}
           id="nickname"
           placeholder="닉네임을 입력해주세요"
-          aria-invalid={!!errors.nickname}
+          aria-invalid={!!error}
         />
 
         <Button
           size="md"
-          variant={isNicknameVerified ? "green" : "white"}
+          variant={isVerified ? "green" : "white"}
           className="shrink-0"
-          disabled={nicknameCheckMutation.isPending || isNicknameVerified}
-          isLoading={nicknameCheckMutation.isPending}
-          onClick={handleNicknameDuplicateCheck}
+          disabled={isPending || isVerified}
+          isLoading={isPending}
+          onClick={handleDuplicateCheck}
         >
-          {isNicknameVerified ? "확인완료" : "중복확인"}
+          {isVerified ? "확인완료" : "중복확인"}
         </Button>
       </div>
 
-      {errors.nickname && (
-        <p className="text-danger mt-[0.6rem] text-[1.2rem]">{errors.nickname.message}</p>
-      )}
+      {error && <p className="text-danger mt-[0.6rem] text-[1.2rem]">{error.message}</p>}
     </div>
   );
 };
