@@ -23,11 +23,11 @@ const buttonVariants = cva(
         gray: "bg-surface text-gray hover:bg-dark-soft hover:text-background",
         white: "bg-background text-gray border border-muted hover:bg-dark-soft hover:text-white",
         danger: "bg-danger text-background hover:opacity-90",
+        green: "bg-[#DBEFEC] text-[#0B6E64] border-[#0B6E64] hover:opacity-90",
       },
       size: {
-        sm: "px-[1.4rem] py-[1.1rem]",
-        md: "h-[4.2rem] px-[1rem]",
-        lg: "h-12 px-5",
+        sm: "h-[3.6rem] py-[1.1rem]",
+        md: "h-[4.2rem] px-[1.3rem]",
       },
     },
     defaultVariants: {
@@ -61,7 +61,7 @@ export function Button({
       className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     >
-      {isLoading ? "확인 중..." : children}
+      {isLoading ? "..." : children}
     </button>
   );
 }

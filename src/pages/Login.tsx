@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import { Button } from "@/shared/ui/Button";
 import CheckBox from "@/shared/ui/CheckBox";
-import Input from "@/shared/ui/Input";
+import { Input } from "@/shared/ui/Input";
 
 const Login = () => {
   return (

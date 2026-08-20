@@ -1,47 +1,34 @@
 import { useFormContext, useFormState, useWatch } from "react-hook-form";
 
-import { useCheckEmailMutation } from "@/features/auth/signup/api/useCheckEmailMutation";
-import type { SignupFormValues } from "@/features/auth/signup/model/signupSchema";
+import { useCheckEmailMutation } from "@/features/signup/api/useCheckEmailMutation";
+import type { SignupFormValues } from "@/features/signup/model/signupSchema";
 import { Button } from "@/shared/ui/Button";
-import Input from "@/shared/ui/Input";
+import { Input } from "@/shared/ui/Input";
 
 const EmailField = () => {
-  const { register, control, trigger, getValues, setError, clearErrors } =
-    useFormContext<SignupFormValues>();
-
+  const form = useFormContext<SignupFormValues>();
+  const verifiedEmail = form.getValues("verifiedEmail");
   const email = useWatch({
     name: "email",
   });
-
-  const { errors } = useFormState({
-    control,
+  const isEmailVerified = email !== "" && email === verifiedEmail;
+  const { errors } = useFormState<SignupFormValues>({
     name: "email",
   });
 
   const emailCheckMutation = useCheckEmailMutation();
 
-  const isEmailVerified =
-    emailCheckMutation.isSuccess &&
-    emailCheckMutation.data?.available === true &&
-    emailCheckMutation.variables === email;
-
   const handleEmailDuplicateCheck = async () => {
-    const isValid = await trigger("email");
+    const isValid = await form.trigger("email");
 
-    if (!isValid) {
-      return;
-    }
+    if (!isValid) return;
 
-    const emailToCheck = getValues("email");
-
-    emailCheckMutation.mutate(emailToCheck, {
+    emailCheckMutation.mutate(email, {
       onSuccess: (data) => {
-        if (getValues("email") !== emailToCheck) {
-          return;
-        }
+        if (form.getValues("email") !== email) return;
 
         if (!data.available) {
-          setError("email", {
+          form.setError("email", {
             type: "server",
             message: "이미 사용 중인 이메일입니다.",
           });
@@ -49,7 +36,14 @@ const EmailField = () => {
           return;
         }
 
-        clearErrors("email");
+        form.clearErrors("email");
+        form.setValue("verifiedEmail", email);
+      },
+      onError: () => {
+        form.setError("email", {
+          type: "server",
+          message: "이메일 중복확인 요청에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        });
       },
     });
   };
@@ -66,14 +60,13 @@ const EmailField = () => {
           id="email"
           placeholder="name@example.com"
           aria-invalid={!!errors.email}
-          {...register("email")}
+          {...form.register("email")}
         />
 
         <Button
-          type="button"
-          className="shrink-0"
           size="md"
-          variant="black"
+          variant={isEmailVerified ? "green" : "white"}
+          className="shrink-0"
           disabled={emailCheckMutation.isPending || isEmailVerified}
           isLoading={emailCheckMutation.isPending}
           onClick={handleEmailDuplicateCheck}

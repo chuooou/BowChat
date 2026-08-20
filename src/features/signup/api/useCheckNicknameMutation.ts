@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { checkNicknameDuplicate } from "./signup";
+import { checkNicknameDuplicate } from "./signupApi";
 
 export const useCheckNicknameMutation = () => {
   return useMutation({
