@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { Toaster } from "sonner";
 
+import { AuthProvider } from "@/app/providers/AuthProvider";
 import { router } from "@/app/router/router";
 
 import { QueryProvider } from "./app/providers/QueryProvider";
@@ -23,9 +24,11 @@ async function enableMocking() {
 
 enableMocking().then(() => {
   createRoot(document.getElementById("root")!).render(
-    <QueryProvider>
-      <RouterProvider router={router} />
-      <Toaster />
-    </QueryProvider>,
+    <AuthProvider>
+      <QueryProvider>
+        <RouterProvider router={router} />
+        <Toaster />
+      </QueryProvider>
+    </AuthProvider>,
   );
 });

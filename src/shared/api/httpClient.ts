@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import { tokenStore } from "@/shared/auth/tokenStore";
+
 const config = {
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
@@ -13,7 +15,7 @@ const http = axios.create(config);
 
 http.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = tokenStore.getAccessToken();
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -43,4 +45,45 @@ http.interceptors.response.use(
   },
 );
 
-export { http, publicHttp };
+// export { http, publicHttp };
+
+//   async (error: AxiosError) => {
+//     const originalRequest =
+//       error.config as
+//         | RetryRequestConfig
+//         | undefined;
+
+//     if (
+//       error.response?.status !== 401 ||
+//       !originalRequest ||
+//       originalRequest._retry
+//     ) {
+//       return Promise.reject(error);
+//     }
+
+//     originalRequest._retry = true;
+
+//     try {
+//       if (!refreshPromise) {
+//         refreshPromise =
+//           refreshTokenRequest().finally(
+//             () => {
+//               refreshPromise = null;
+//             },
+//           );
+//       }
+
+//       const accessToken =
+//         await refreshPromise;
+
+//       originalRequest.headers.Authorization =
+//         `Bearer ${accessToken}`;
+
+//       return http(originalRequest);
+//     } catch {
+//       tokenStore.clearAccessToken();
+//       authStorage.clear();
+
+//       return Promise.reject(error);
+//     }
+//   },

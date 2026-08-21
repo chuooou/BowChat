@@ -3,8 +3,8 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-import { useSignupMutation } from "@/features/signup/api/useSignupMutation";
 import { type SignupFormValues, signupSchema } from "@/features/signup/model/signupSchema";
+import { useSignupMutation } from "@/features/signup/model/useSignupMutation";
 import NicknameField from "@/features/signup/ui/NicknameField";
 import { Button } from "@/shared/ui/Button";
 import CheckBox from "@/shared/ui/CheckBox";
@@ -12,7 +12,7 @@ import { PasswordInput } from "@/shared/ui/Input";
 
 import EmailField from "./EmailField";
 
-const signupDefaultValues: SignupFormValues = {
+const SIGNUP_DEFAULT_VALUES = {
   email: "",
   verifiedEmail: "",
   password: "",
@@ -23,9 +23,9 @@ const signupDefaultValues: SignupFormValues = {
 };
 
 const SignupForm = () => {
-  const methods = useForm<SignupFormValues>({
+  const methods = useForm({
     resolver: zodResolver(signupSchema),
-    defaultValues: signupDefaultValues,
+    defaultValues: SIGNUP_DEFAULT_VALUES,
   });
   const navigate = useNavigate();
 

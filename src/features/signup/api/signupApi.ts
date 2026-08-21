@@ -1,4 +1,4 @@
-import { http } from "msw";
+import { http } from "@/shared/api/httpClient";
 
 type DuplicateCheckResponse = {
   available: boolean;
@@ -26,8 +26,8 @@ export const checkNicknameDuplicate = async (nickname: string) => {
   return data;
 };
 
-export const signUp = async (formData: SignUpRequest) => {
-  const { data } = await http.post("/user/signup", formData);
+export const signUp = async (requestData: SignUpRequest) => {
+  const { data } = await http.post("/user/signup", requestData);
 
   return data;
 };
