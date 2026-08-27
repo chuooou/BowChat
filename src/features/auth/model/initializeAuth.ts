@@ -10,26 +10,23 @@ export const initializeAuth = async () => {
   }
 
   if (authStorage.isRefreshTokenExpired()) {
-    tokenStore.clearAccessToken();
-    authStorage.clear();
+    clearToken();
 
     return false;
   }
 
   try {
-    const data = await refreshAccessToken(refreshToken);
-
-    tokenStore.setAccessToken(data.accessToken);
-
-    if (data.refreshToken && data.refreshTokenExpiresIn) {
-      authStorage.setRefreshToken(data.refreshToken, data.refreshTokenExpiresIn);
-    }
+    await refreshAccessToken();
 
     return true;
   } catch {
-    tokenStore.clearAccessToken();
-    authStorage.clear();
+    clearToken();
 
     return false;
   }
+};
+
+export const clearToken = () => {
+  tokenStore.clearAccessToken();
+  authStorage.clear();
 };

@@ -1,6 +1,19 @@
-import axios from "axios";
+import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
+import { refreshAccessToken } from "@/features/auth/api/authApi";
+import { clearToken } from "@/features/auth/model/initializeAuth";
+import { authEvents } from "@/shared/auth/authEvents";
 import { tokenStore } from "@/shared/auth/tokenStore";
+
+type RefreshResponse = {
+  accessToken: string;
+  refreshToken?: string;
+  refreshTokenExpiresIn?: number;
+};
+
+type RetryRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
 
 const config = {
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -26,64 +39,38 @@ http.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+let refreshPromise: Promise<string> | null = null;
+
 http.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // refresh token으로 재발급 요청
-      // 성공 → 새 access token 저장 → 기존 요청 한 번 재시도 / 다시 401이면 실패 처리
-      // 실패 → 저장 정보 제거 → /login 이동
-      //       if (error.response?.status === 401 && !originalRequest._retry) {
-      //   originalRequest._retry = true;
-      //   const newAccessToken = await refreshAccessToken();
-      //   originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-      //   return http(originalRequest);
-      // }
+  async (error: AxiosError) => {
+    const originalRequest = error.config as RetryRequestConfig;
+    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    originalRequest._retry = true;
+
+    try {
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken().finally(() => {
+          refreshPromise = null;
+        });
+      }
+
+      const newAccessToken = await refreshPromise;
+
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+      return http(originalRequest);
+    } catch (refreshError) {
+      clearToken();
+
+      authEvents.emitUnauthorized();
+
+      return Promise.reject(refreshError);
+    }
   },
 );
 
-// export { http, publicHttp };
-
-//   async (error: AxiosError) => {
-//     const originalRequest =
-//       error.config as
-//         | RetryRequestConfig
-//         | undefined;
-
-//     if (
-//       error.response?.status !== 401 ||
-//       !originalRequest ||
-//       originalRequest._retry
-//     ) {
-//       return Promise.reject(error);
-//     }
-
-//     originalRequest._retry = true;
-
-//     try {
-//       if (!refreshPromise) {
-//         refreshPromise =
-//           refreshTokenRequest().finally(
-//             () => {
-//               refreshPromise = null;
-//             },
-//           );
-//       }
-
-//       const accessToken =
-//         await refreshPromise;
-
-//       originalRequest.headers.Authorization =
-//         `Bearer ${accessToken}`;
-
-//       return http(originalRequest);
-//     } catch {
-//       tokenStore.clearAccessToken();
-//       authStorage.clear();
-
-//       return Promise.reject(error);
-//     }
-//   },
+export { http, publicHttp };

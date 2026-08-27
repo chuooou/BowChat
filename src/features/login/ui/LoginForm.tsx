@@ -91,7 +91,7 @@ const LoginForm = () => {
       </div>
       <div className="mt-[1.6rem] flex items-center justify-between">
         <div className="text-gray flex items-center gap-[0.8rem] text-[1.3rem] font-medium">
-          <CheckBox id="autoLogin" name="autoLogin" />
+          <CheckBox id="autoLogin" {...methods.register("autoLogin")} />
           <label htmlFor="autoLogin">자동 로그인</label>
         </div>
         <p className="text-light-gray text-[1.3rem] font-medium">

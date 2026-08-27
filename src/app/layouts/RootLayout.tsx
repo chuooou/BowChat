@@ -1,6 +1,10 @@
 import { Link, Outlet } from "react-router-dom";
 
+import { useAuth } from "@/app/providers/auth/useAuth";
+
 const RootLayout = () => {
+  const { status, logout } = useAuth();
+
   return (
     <>
       <div className="min-h-screen bg-gray-50">
@@ -16,7 +20,11 @@ const RootLayout = () => {
               <Link to="/">경매</Link>
               <Link to="/chats">채팅</Link>
               <Link to="/mypage">마이페이지</Link>
-              <Link to="/login">로그인</Link>
+              {status === "authenticated" ? (
+                <button onClick={logout}>로그아웃</button>
+              ) : (
+                <Link to="/login">로그인</Link>
+              )}
             </nav>
           </div>
         </header>
