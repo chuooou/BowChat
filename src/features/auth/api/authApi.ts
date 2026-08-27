@@ -1,11 +1,16 @@
 import { http, publicHttp } from "@/shared/api/httpClient";
 import { authStorage } from "@/shared/auth/authStorage";
-import { tokenStore } from "@/shared/auth/tokenStore";
 
 type RefreshResponse = {
   accessToken: string;
   refreshToken?: string;
   refreshTokenExpiresIn?: number;
+};
+
+export type UserInfo = {
+  id: number;
+  email: string;
+  nickname: string;
 };
 
 export const refreshAccessToken = async () => {
@@ -15,15 +20,31 @@ export const refreshAccessToken = async () => {
     throw new Error("Refresh token is not available");
   }
 
-  const { data } = await http.post<RefreshResponse>("/auth/refresh", {
+  const { data } = await publicHttp.post<RefreshResponse>("/auth/refresh", {
     refreshToken,
   });
 
-  tokenStore.setAccessToken(data.accessToken);
+  authStorage.setAccessToken(data.accessToken);
 
   if (data.refreshToken && data.refreshTokenExpiresIn) {
-    authStorage.setRefreshToken(data.refreshToken, data.refreshTokenExpiresIn);
+    authStorage.setTokens({
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      refreshTokenExpiresIn: data.refreshTokenExpiresIn,
+    });
   }
 
   return data.accessToken;
+};
+
+export const getMe = async () => {
+  const { data } = await http.get<UserInfo>("/auth/me");
+
+  return data;
+};
+
+export const logout = async () => {
+  const { data } = await http.post("/auth/logout");
+
+  return data;
 };

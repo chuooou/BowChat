@@ -1,25 +1,31 @@
-// app/router/guards/AuthGuard.tsx
-
 import { Navigate, Outlet } from "react-router";
 
-import { useAuth } from "@/app/providers/auth/useAuth";
+import { useAuth } from "@/features/auth/model/useAuth";
 
 type AuthGuardProps = {
   mode: "protected" | "guest";
 };
 
 const AuthGuard = ({ mode }: AuthGuardProps) => {
-  const { status } = useAuth();
+  const { isAuthenticated, isLoading, hasStoredToken } = useAuth();
 
-  if (status === "initializing") {
+  if (!hasStoredToken) {
+    if (mode === "protected") {
+      return <Navigate to="/login" replace />;
+    }
+
+    return <Outlet />;
+  }
+
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (mode === "protected" && status === "unauthenticated") {
+  if (mode === "protected" && !isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (mode === "guest" && status === "authenticated") {
+  if (mode === "guest" && isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 

@@ -18,9 +18,3 @@ export const login = async (requestData: LoginRequest) => {
 
   return data;
 };
-
-export const logout = async () => {
-  const { data } = await http.post("/auth/logout");
-
-  return data;
-};

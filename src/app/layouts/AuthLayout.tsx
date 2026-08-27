@@ -18,7 +18,7 @@ const AuthLayout = () => {
         </div>
         <p className="text-light-gray text-[1.15rem]">@ BowChat</p>
       </div>
-      <div className="h-full w-1/2 p-[4rem]">
+      <div className="bg-background h-full w-1/2 p-[4rem]">
         <Outlet />
       </div>
     </div>

@@ -5,7 +5,7 @@ import LoginForm from "@/features/login/ui/LoginForm";
 const Login = () => {
   return (
     <section className="bg-background flex h-full w-full flex-col items-center justify-center">
-      <div className="mx-auto w-full max-w-xl">
+      <div className="w-full max-w-xl">
         <h2 className="text-[2rem] font-bold">로그인</h2>
 
         <LoginForm />
