@@ -4,6 +4,7 @@ import { checkNicknameDuplicate } from "@/features/signup/api/signupApi";
 import { useDuplicateCheck } from "@/features/signup/api/useDuplicateCheck";
 import type { SignupFormValues } from "@/features/signup/model/signupSchema";
 import { Button } from "@/shared/ui/Button";
+import ErrorMessage from "@/shared/ui/ErrorMessage";
 import { Input } from "@/shared/ui/Input";
 
 const NicknameField = () => {
@@ -42,7 +43,7 @@ const NicknameField = () => {
         </Button>
       </div>
 
-      {error && <p className="text-danger mt-[0.6rem] text-[1.2rem]">{error.message}</p>}
+      <ErrorMessage message={error?.message} />
     </div>
   );
 };

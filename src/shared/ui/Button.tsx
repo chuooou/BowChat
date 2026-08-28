@@ -20,7 +20,7 @@ const buttonVariants = cva(
       variant: {
         primary: "bg-primary text-background hover:bg-primary-hover",
         black: "bg-dark text-background hover:bg-dark-soft",
-        gray: "bg-surface text-gray hover:bg-dark-soft hover:text-background",
+        gray: "bg-surface text-gray hover:bg-muted hover:text-background",
         white: "bg-background text-gray border border-muted hover:bg-dark-soft hover:text-white",
         danger: "bg-danger text-background hover:opacity-90",
         green: "bg-[#DBEFEC] text-[#0B6E64] border-[#0B6E64] hover:opacity-90",
@@ -66,7 +66,4 @@ export function Button({
   );
 }
 
-// * 버튼에 아이콘만 표시할 경우 아래와 같은 속성 추가
-// <Button aria-label="관심 경매">
-//   <HeartIcon aria-hidden="true" />
-// </Button>
+// * 버튼에 아이콘만 표시할 경우 aria-label="관심 경매" 속성 추가

@@ -9,6 +9,7 @@ import { type LoginFormValues, loginSchema } from "@/features/login/model/loginS
 import { authStorage } from "@/shared/auth/authStorage";
 import { Button } from "@/shared/ui/Button";
 import CheckBox from "@/shared/ui/CheckBox";
+import ErrorMessage from "@/shared/ui/ErrorMessage";
 import { Input, PasswordInput } from "@/shared/ui/Input";
 
 const LOGIN_DEFAULT_VALUES = {
@@ -40,7 +41,7 @@ const LoginForm = () => {
         navigate("/");
       },
       onError: ({ message }) => {
-        toast.error(message ?? "로그인에 실패했습니다. 다시 시도해주세요.");
+        toast.error(message ?? "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.");
       },
     });
   };
@@ -57,11 +58,7 @@ const LoginForm = () => {
           placeholder="이메일을 입력해주세요"
           {...methods.register("email")}
         />
-        {methods.formState.errors.email && (
-          <p className="text-danger mt-[0.6rem] text-[1.2rem]">
-            {methods.formState.errors.email.message}
-          </p>
-        )}
+        <ErrorMessage message={methods.formState.errors.email?.message} />
       </div>
       <div className="mt-[1.6rem]">
         <label
@@ -75,11 +72,7 @@ const LoginForm = () => {
           placeholder="비밀번호를 입력해주세요"
           {...methods.register("password")}
         />
-        {methods.formState.errors.password && (
-          <p className="text-danger mt-[0.6rem] text-[1.2rem]">
-            {methods.formState.errors.password.message}
-          </p>
-        )}
+        <ErrorMessage message={methods.formState.errors.password?.message} />
       </div>
       <div className="mt-[1.6rem] flex items-center justify-between">
         <div className="text-gray flex items-center gap-[0.8rem] text-[1.3rem] font-medium">

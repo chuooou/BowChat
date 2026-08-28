@@ -3,6 +3,14 @@ import { delay, http, HttpResponse } from "msw";
 const duplicatedEmails = ["test@example.com", "admin@example.com"];
 const duplicatedNicknames = ["관리자", "테스트"];
 
+type CreateProductRequest = {
+  name: string;
+  description: string;
+  price: number;
+  imageUrls: string[];
+  saleType: "AUCTION" | "DIRECT";
+};
+
 export const handlers = [
   http.get("*/auth/me", async ({ request }) => {
     await delay(400);
@@ -55,6 +63,34 @@ export const handlers = [
   //     { status: 401 },
   //   );
   // }),
+
+  http.post("*/api/products", async ({ request }) => {
+    await delay(400);
+
+    const authorization = request.headers.get("Authorization");
+
+    if (!authorization?.startsWith("Bearer ") || !authorization.slice(7).trim()) {
+      return HttpResponse.json({ message: "로그인이 필요합니다." }, { status: 401 });
+    }
+
+    const product = (await request.json()) as CreateProductRequest;
+
+    if (product.saleType !== "AUCTION" && product.saleType !== "DIRECT") {
+      return HttpResponse.json(
+        { message: "saleType은 AUCTION 또는 DIRECT여야 합니다." },
+        { status: 400 },
+      );
+    }
+
+    return HttpResponse.json(
+      {
+        id: 1,
+        ...product,
+        createdAt: new Date().toISOString(),
+      },
+      { status: 201 },
+    );
+  }),
 
   http.get("*/user/check-email", async ({ request }) => {
     await delay(400);

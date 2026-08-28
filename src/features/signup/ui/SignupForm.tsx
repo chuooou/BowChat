@@ -8,6 +8,7 @@ import { useSignupMutation } from "@/features/signup/model/useSignupMutation";
 import NicknameField from "@/features/signup/ui/NicknameField";
 import { Button } from "@/shared/ui/Button";
 import CheckBox from "@/shared/ui/CheckBox";
+import ErrorMessage from "@/shared/ui/ErrorMessage";
 import { PasswordInput } from "@/shared/ui/Input";
 
 import EmailField from "./EmailField";
@@ -89,12 +90,7 @@ const SignupForm = () => {
             placeholder="8자 이상 입력해주세요"
             aria-invalid={!!methods.formState.errors.password}
           />
-
-          {methods.formState.errors.password && (
-            <p className="text-danger mt-[0.6rem] text-[1.2rem]">
-              {methods.formState.errors.password.message}
-            </p>
-          )}
+          <ErrorMessage message={methods.formState.errors.password?.message} />
         </div>
 
         <div className="mt-[1.6rem]">
@@ -111,12 +107,7 @@ const SignupForm = () => {
             placeholder="다시 한 번 입력해주세요"
             aria-invalid={!!methods.formState.errors.passwordConfirm}
           />
-
-          {methods.formState.errors.passwordConfirm && (
-            <p className="text-danger mt-[0.6rem] text-[1.2rem]">
-              {methods.formState.errors.passwordConfirm.message}
-            </p>
-          )}
+          <ErrorMessage message={methods.formState.errors.passwordConfirm?.message} />
         </div>
 
         <NicknameField />
@@ -131,12 +122,7 @@ const SignupForm = () => {
 
             <label htmlFor="agree">[필수] 이용약관 및 개인정보처리방침에 동의합니다</label>
           </div>
-
-          {methods.formState.errors.agree && (
-            <p className="text-danger mt-[0.6rem] text-[1.2rem]">
-              {methods.formState.errors.agree.message}
-            </p>
-          )}
+          <ErrorMessage message={methods.formState.errors.agree?.message} />
         </div>
 
         <Button
