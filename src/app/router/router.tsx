@@ -5,7 +5,7 @@ import AuthGuard from "@/app/router/AuthGuard";
 import { authRoutes } from "@/app/router/authRouter";
 import AuctionList from "@/pages/AuctionList";
 import NotFound from "@/pages/NotFound";
-import Register from "@/pages/products/register";
+import Register from "@/pages/products/Register";
 
 export const router = createBrowserRouter([
   {
@@ -16,8 +16,13 @@ export const router = createBrowserRouter([
         element: <AuthGuard mode="protected" />,
         children: [
           {
-            path: "/products/register",
-            element: <Register />,
+            path: "products",
+            children: [
+              {
+                path: "register",
+                element: <Register />,
+              },
+            ],
           },
         ],
       },

@@ -53,10 +53,13 @@ http.interceptors.response.use(
         });
       }
       const newAccessToken = await refreshPromise;
+
       originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
       return http(originalRequest);
     } catch (refreshError) {
       authStorage.clear();
+
       return Promise.reject(refreshError);
     }
   },
