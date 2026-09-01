@@ -1,8 +1,11 @@
-import { Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 
 import { useProductDetailQuery } from "@/features/products/detail/api/useProductDetailQuery";
+import LiveBidStatus from "@/features/products/detail/ui/LiveBidStatus";
 import ProductDetailSkeleton from "@/features/products/detail/ui/ProductDetailSkeleton";
 import ThumbnailWrapper from "@/features/products/detail/ui/ThumbnailWrapper";
+import { AUCTION_STATUS_LABEL } from "@/features/products/model/constants";
+import { formatRemainingTime } from "@/shared/lib/formatTime";
 import { Button } from "@/shared/ui/Button";
 
 const ProductDetail = () => {
@@ -15,7 +18,7 @@ const ProductDetail = () => {
     isPending,
     isError,
     refetch,
-  } = useProductDetailQuery(id, isValidProductId);
+  } = useProductDetailQuery(productId, isValidProductId);
 
   if (!isValidProductId) {
     return <Navigate to="/" replace />;
@@ -37,6 +40,9 @@ const ProductDetail = () => {
     );
   }
 
+  //  판매자 , 구매자 정책 확인
+  //   마감까지 카운트다운 아이콘 반짝반짝
+
   return (
     <article className="flex justify-between gap-[3.6rem] py-[3rem]">
       <ThumbnailWrapper images={product.imageUrls} />
@@ -50,39 +56,30 @@ const ProductDetail = () => {
         </div>
         <div className="mt-[1.3rem] text-[1.3rem]">
           <span className="bg-dark inline-block rounded-full px-[1.2rem] py-[.8rem] text-white">
-            🔴 마감까지 00:15:20
+            🔴 마감까지 {formatRemainingTime(product.endAt)}
           </span>
           <span className="bg-surface text-gray ml-[.8rem] inline-block rounded-full px-[1rem] py-[.5rem]">
-            경매 진행중
+            경매 {AUCTION_STATUS_LABEL[product.auctionStatus]}
           </span>
         </div>
-        <div className="text-light-gray mt-[1rem] text-[1.3rem]">
-          내 입찰 상태
-          <span className="bg-primary-light text-primary ml-[.8rem] inline-block rounded-full px-[1.2rem] py-[.8rem]">
-            입찰중 · 750,000원
-          </span>
-        </div>
-        {/* TODO: webSocket 연동 */}
-        <article className="text-light-gray mt-[1.8rem] w-full rounded-[1.6rem] bg-[#1D2230] px-[1.2rem] py-[1.8rem] text-[1.3rem]">
-          <p className="text-primary text-[1.2rem] font-bold">실시간 입찰 현황 · 미리보기</p>
-          <div className="mt-[.7rem]">
-            <span className="text-[2.8rem] font-bold text-white">
-              {product.price.toLocaleString()}원
+        <p className="mt-[1.3rem] text-[1.3rem]">{product.description}</p>
+        {!product.isSeller && (
+          <div className="mt-[1rem] text-[1.3rem]">
+            내 입찰 상태
+            <span className="bg-primary-light text-primary ml-[.8rem] inline-block rounded-full px-[1.2rem] py-[.8rem]">
+              입찰중 · 750,000원
             </span>
-            <span className="ml-[.8rem] text-[1.3rem]">최고 입찰자 user01</span>
           </div>
-          <p className="border-gray border-t py-[.5rem]">
-            user01님이 750,000원으로 입찰했어요 · 방금
-          </p>
-          <p className="border-gray border-t py-[.5rem]">
-            user02님이 730,000원으로 입찰했어요 · 1분 전
-          </p>
-          <p className="mt-[.5rem] text-[1.2rem]">
-            전체 로그와 입찰은 입찰방에서 확인할 수 있어요 →
-          </p>
-        </article>
+        )}
 
-        <Button className="mt-[1.8rem] w-full">입찰방 입장하기</Button>
+        <LiveBidStatus productId={productId} />
+
+        {/* 츄 - 버튼 안에 링크 변경하기 */}
+        <Button className="mt-[1.8rem] w-full" variant="primary" size="md">
+          <Link to={`/products/${productId}/bidding`} className="">
+            입찰방 입장하기
+          </Link>
+        </Button>
         <p className="text-light-gray mt-[1rem] text-center text-[1.2rem]">
           🔒 낙찰되면 이 버튼이 그대로 [채팅하기]로 바뀌어요
         </p>

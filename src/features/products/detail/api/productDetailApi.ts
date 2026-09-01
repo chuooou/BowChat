@@ -9,7 +9,7 @@ export type ProductDetailResponse = {
   sellerNickname: string;
   saleType: "AUCTION" | "DIRECT";
   auctionStatus: "BEFORE_START" | "IN_PROGRESS" | "ENDED";
-  remainingSeconds: number;
+  endAt: string;
   isSeller: boolean;
 };
 

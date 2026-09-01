@@ -23,21 +23,50 @@ const productAuctionSocketHandler = productAuctionSocket.addEventListener(
         type: "AUCTION_SNAPSHOT",
         productId: Number(params.productId),
         highestBid: 750000,
-        highestBidder: "user01",
+        highestBidder: "왈왈",
         bids: [
           {
-            bidderNickname: "user01",
-            amount: 750000,
-            bidAt: new Date(now).toISOString(),
+            bidderNickname: "왈왈",
+            amount: 710000,
+            bidAt: new Date(now - 60000).toISOString(),
           },
           {
-            bidderNickname: "user02",
+            bidderNickname: "tester",
             amount: 730000,
-            bidAt: new Date(now - 60_000).toISOString(),
+            bidAt: new Date(now - 240_000).toISOString(),
+          },
+          {
+            bidderNickname: "아이패드좋아",
+            amount: 735000,
+            bidAt: new Date(now - 240_000).toISOString(),
           },
         ],
       }),
     );
+
+    setTimeout(() => {
+      client.send(
+        JSON.stringify({
+          type: "BID_PLACED",
+          productId: Number(params.productId),
+          bidderNickname: "당근",
+          amount: 760000,
+          bidAt: new Date().toISOString(),
+        }),
+      );
+    }, 2000);
+
+    setTimeout(() => {
+      client.send(
+        JSON.stringify({
+          type: "BID_PLACED",
+          productId: Number(params.productId),
+          bidderNickname: "아이패드좋아",
+          amount: 765000,
+          bidAt: new Date().toISOString(),
+        }),
+      );
+    }, 5000);
   },
 );
 
@@ -115,7 +144,7 @@ export const handlers = [
       sellerNickname: "츄츄",
       saleType: "AUCTION" as const,
       auctionStatus: "IN_PROGRESS" as const,
-      remainingSeconds: 36 * 60,
+      endAt: "2026-09-01T23:30:00+09:00",
       isSeller: Boolean(hasAccessToken),
     });
   }),
