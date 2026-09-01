@@ -1,4 +1,4 @@
-import { http } from "@/shared/api/httpClient";
+import { publicHttp } from "@/shared/api/httpClient";
 
 type LoginRequest = {
   email: string;
@@ -14,7 +14,7 @@ type LoginResponse = {
 };
 
 export const login = async (requestData: LoginRequest) => {
-  const { data } = await http.post<LoginResponse>("/auth/login", requestData);
+  const { data } = await publicHttp.post<LoginResponse>("/auth/login", requestData);
 
   return data;
 };

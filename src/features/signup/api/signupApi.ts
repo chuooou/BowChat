@@ -1,4 +1,4 @@
-import { http } from "@/shared/api/httpClient";
+import { http, publicHttp } from "@/shared/api/httpClient";
 
 type DuplicateCheckResponse = {
   available: boolean;
@@ -27,7 +27,7 @@ export const checkNicknameDuplicate = async (nickname: string) => {
 };
 
 export const signUp = async (requestData: SignUpRequest) => {
-  const { data } = await http.post("/user/signup", requestData);
+  const { data } = await publicHttp.post("/user/signup", requestData);
 
   return data;
 };

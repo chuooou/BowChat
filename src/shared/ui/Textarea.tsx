@@ -12,7 +12,7 @@ const inputVariants = cva(
     "placeholder:text-muted placeholder:text-[1.4rem]",
     "disabled:cursor-not-allowed",
     "disabled:opacity-50",
-    "aria-invalid:border-danger",
+    "aria-invalid:border-primary",
     "bg-white",
   ],
   {

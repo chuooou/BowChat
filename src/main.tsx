@@ -10,7 +10,7 @@ import { router } from "@/app/router/router";
 import { QueryProvider } from "./app/providers/QueryProvider";
 
 async function enableMocking() {
-  if (!import.meta.env.DEV) {
+  if (!import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW !== "true") {
     return;
   }
 

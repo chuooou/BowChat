@@ -5,6 +5,7 @@ import AuthGuard from "@/app/router/AuthGuard";
 import { authRoutes } from "@/app/router/authRouter";
 import AuctionList from "@/pages/AuctionList";
 import NotFound from "@/pages/NotFound";
+import ProductDetail from "@/pages/products/Detail";
 import Register from "@/pages/products/Register";
 
 export const router = createBrowserRouter([
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
                 path: "register",
                 element: <Register />,
               },
+              { path: ":id", element: <ProductDetail /> },
             ],
           },
         ],

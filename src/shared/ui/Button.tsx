@@ -22,7 +22,6 @@ const buttonVariants = cva(
         black: "bg-dark text-background hover:bg-dark-soft",
         gray: "bg-surface text-gray hover:bg-muted hover:text-background",
         white: "bg-background text-gray border border-muted hover:bg-dark-soft hover:text-white",
-        danger: "bg-danger text-background hover:opacity-90",
         green: "bg-[#DBEFEC] text-[#0B6E64] border-[#0B6E64] hover:opacity-90",
       },
       size: {

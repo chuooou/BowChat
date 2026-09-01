@@ -22,12 +22,6 @@ const PRODUCT_REGISTER_DEFAULT_VALUES: ProductRegisterFormValues = {
   saleType: "AUCTION",
 };
 
-const formatWithComma = (value: string) => {
-  const cleanValue = value.replace(/[^0-9]/g, "");
-  if (!cleanValue) return "";
-  return Number(cleanValue).toLocaleString("ko-KR");
-};
-
 const Register = () => {
   const navigate = useNavigate();
   const methods = useForm({

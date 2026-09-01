@@ -12,7 +12,7 @@ const Login = () => {
 
         <p className="text-gray mt-[2.4rem] text-center text-[1.3rem]">
           아직 계정이 없으신가요?{" "}
-          <Link to="/signup" className="text-danger font-bold">
+          <Link to="/signup" className="text-primary font-bold">
             회원가입
           </Link>
         </p>
