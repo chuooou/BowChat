@@ -11,6 +11,9 @@ export type ProductDetailResponse = {
   auctionStatus: "BEFORE_START" | "IN_PROGRESS" | "ENDED";
   endAt: string;
   isSeller: boolean;
+  isWinner: boolean;
+  hasBid: boolean;
+  myBidAmount: number;
 };
 
 export const getProductDetail = async (productId: string | number) => {

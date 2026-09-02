@@ -62,7 +62,7 @@ const RootLayout = () => {
                   <Link to="/login">로그인</Link>
                 </>
               )}
-              <Button>
+              <Button asChild>
                 <Link to="/products/register">상품 등록</Link>
               </Button>
             </div>

@@ -143,9 +143,12 @@ export const handlers = [
       ],
       sellerNickname: "츄츄",
       saleType: "AUCTION" as const,
-      auctionStatus: "IN_PROGRESS" as const,
-      endAt: "2026-09-01T23:30:00+09:00",
+      auctionStatus: "BEFORE_START" as const,
+      endAt: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
       isSeller: Boolean(hasAccessToken),
+      isWinner: false,
+      hasBid: true,
+      myBidAmount: 750000,
     });
   }),
 

@@ -1,3 +1,4 @@
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentPropsWithoutRef } from "react";
 
@@ -40,6 +41,7 @@ type ButtonProps = ComponentPropsWithoutRef<"button"> &
   VariantProps<typeof buttonVariants> & {
     isLoading?: boolean;
     loadingText?: string;
+    asChild?: boolean;
   };
 
 export function Button({
@@ -50,10 +52,13 @@ export function Button({
   children,
   className,
   type = "button",
+  asChild = false,
   ...props
 }: ButtonProps) {
+  const Comp = asChild ? Slot : "button";
+
   return (
-    <button
+    <Comp
       type={type}
       disabled={disabled || isLoading}
       aria-busy={isLoading || undefined}
@@ -61,7 +66,7 @@ export function Button({
       {...props}
     >
       {isLoading ? "..." : children}
-    </button>
+    </Comp>
   );
 }
 
