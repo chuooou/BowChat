@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 import { useAuth } from "@/features/auth/model/useAuth";
 import { useLogout } from "@/features/auth/model/useLogout";
@@ -8,6 +8,9 @@ import { Input } from "@/shared/ui/Input";
 const RootLayout = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const logout = useLogout();
+  const location = useLocation();
+
+  const isChatPage = /^\/products\/bidding\/\d+(?:\/.*)?$/.test(location.pathname);
 
   if (isLoading) {
     return null;
@@ -69,7 +72,7 @@ const RootLayout = () => {
           </div>
         </header>
 
-        <main className="mx-auto w-full px-[4rem]">
+        <main className={`mx-auto w-full ${isChatPage ? "" : "px-[4rem]"}`}>
           <Outlet />
         </main>
       </div>

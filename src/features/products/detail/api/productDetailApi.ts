@@ -17,7 +17,7 @@ export type ProductDetailResponse = {
 };
 
 export const getProductDetail = async (productId: string | number) => {
-  const { data } = await http.get<ProductDetailResponse>(`/api/products/${productId}`);
+  const { data } = await http.get<ProductDetailResponse>(`/api/auctions/${productId}`);
 
   return data;
 };

@@ -11,6 +11,9 @@ type CreateProductRequest = {
   saleType: "AUCTION" | "DIRECT";
 };
 
+type EnterChatRoomRequest =
+  { roomType: "DIRECT" | "AUCTION"; productId: number } | { roomType: "GROUP"; roomName: string };
+
 const productAuctionSocket = ws.link("*/ws/products/:productId");
 
 const productAuctionSocketHandler = productAuctionSocket.addEventListener(
@@ -125,7 +128,39 @@ export const handlers = [
   //   );
   // }),
 
-  http.get("*/api/products/:productId", async ({ params, request }) => {
+  http.post("*/api/chat/rooms/enter", async ({ request }) => {
+    await delay(400);
+
+    const body = (await request.json()) as EnterChatRoomRequest;
+
+    switch (body.roomType) {
+      case "DIRECT":
+        return HttpResponse.json({
+          roomId: 100,
+          roomType: body.roomType,
+          roomName: "상품 채팅방",
+        });
+
+      case "AUCTION":
+        return HttpResponse.json({
+          roomId: 100,
+          roomType: body.roomType,
+          roomName: "상품 경매방",
+        });
+
+      case "GROUP":
+        return HttpResponse.json({
+          roomId: 100,
+          roomType: body.roomType,
+          roomName: body.roomName,
+        });
+
+      default:
+        return HttpResponse.json({ message: "지원하지 않는 채팅방 타입입니다." }, { status: 400 });
+    }
+  }),
+
+  http.get("*/api/auctions/:productId", async ({ params, request }) => {
     await delay(400);
 
     const authorization = request.headers.get("Authorization");
@@ -135,7 +170,8 @@ export const handlers = [
     return HttpResponse.json({
       id: Number(params.productId),
       name: "아이패드 프로 11인치",
-      description: "깨끗하게 사용한 아이패드 프로입니다. 구성품을 모두 포함합니다.",
+      description:
+        "깨끗하게 사용한 아이패드 프로입니다. 풀박스!! 구성품 모두 포함되어 있습니다. 상태 A+++++급입니다",
       price: 700000,
       imageUrls: [
         "https://dimg.donga.com/wps/NEWS/IMAGE/2024/07/04/125768056.1.jpg",
@@ -143,7 +179,9 @@ export const handlers = [
       ],
       sellerNickname: "츄츄",
       saleType: "AUCTION" as const,
-      auctionStatus: "BEFORE_START" as const,
+      // "BEFORE_START" | "IN_PROGRESS" | "ENDED";
+      auctionStatus: "IN_PROGRESS" as const,
+      startAt: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
       endAt: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
       isSeller: Boolean(hasAccessToken),
       isWinner: false,
