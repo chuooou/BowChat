@@ -10,7 +10,7 @@ BowChat은 중고·리셀 상품을 **실시간 입찰 방식으로 거래하는
 경매 종료 후 낙찰자가 확정되면 판매자와 낙찰자에게만 **1:1 거래 채팅**이 제공되며,  
 배송·결제·거래 일정 등을 조율할 수 있습니다.
 
-📄 [기획 및 화면설계서](./docs/bowchat-screen-spec.pdf)
+📄 [기획 및 화면설계서](/src/docs/bowchat-screen-spec.pdf)
 
 ---
 
@@ -18,7 +18,8 @@ BowChat은 중고·리셀 상품을 **실시간 입찰 방식으로 거래하는
 
 > 실제 구현 화면과 실시간 입찰 Demo는 개발 진행에 따라 추가할 예정입니다.
 
-[상품 상세](./docs/images/product-detail.png)
+[상품 상세](/src/docs/images/product-detail.png)
+[실시간 입찰](/src/docs/images/product-detail.png)
 <!-- 예시
 ![실시간 입찰 Demo](./docs/images/auction-demo.gif)
 -->
