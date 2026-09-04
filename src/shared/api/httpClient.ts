@@ -7,6 +7,8 @@ type RetryRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
 
+// 401로 인한 로그아웃 시 알럿 처리 ?
+
 const config = {
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
@@ -38,8 +40,6 @@ http.interceptors.response.use(
 
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryRequestConfig;
-
-    console.log(originalRequest);
 
     if (error.response?.status !== 401 || !originalRequest || originalRequest._retry) {
       return Promise.reject(error);

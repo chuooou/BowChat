@@ -1,25 +1,59 @@
+import { isAxiosError } from "axios";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+
+import { useChatMessagesQuery } from "@/features/chat/api/useChatMessagesQuery";
+import { useChatRoomAccessQuery } from "@/features/chat/api/useChatRoomAccessQuery";
+import { useChatRoomQuery } from "@/features/chat/api/useChatRoomQuery";
 import Countdown from "@/features/products/detail/ui/Countdown";
 import { Button } from "@/shared/ui/Button";
 
+// 아무나 입장금지 : 입장가능한 사람인지 확인 후 > 확인 시 상품 api+이전 대화내용 요청
+// 입찰가 등록시 : 웹소켓으로 보내기.
+// 실시간 : 현재 내가 최고입찰자인지,
+// 입찰버튼컴포넌트 : 실시간 최고가, 실시간 입찰자, 순위 필요
+// 입찰 시간 종료 시 : 입찰이 종료되었습니다. 알럿뜨고 입력창 막기.
+
 const BiddingRoom = () => {
-  const product = {
-    name: "아이패드 프로 11인치",
-    imageUrl: "https://placehold.co/80x80",
-    endAt: "2026-09-02T20:00:00+09:00",
-  };
+  const { id: roomId } = useParams();
+  const navigate = useNavigate();
 
-  const auction = {
-    highestBid: 750000,
-    highestBidder: "user01",
-    participantCount: 6,
-    myRank: 1,
-    isHighestBidder: true,
-  };
+  const isValidRoomId = Boolean(roomId);
+  const {
+    data: access,
+    error: accessError,
+    isPending: isAccessPending,
+  } = useChatRoomAccessQuery(roomId ?? "", isValidRoomId);
+  const canEnterRoom = access?.canEnter === true;
 
-  // 상품명, 시간, 사진은 밖에서 가져오면 됨
-  // 입장하자마자 : 현재 최고가, 이전 대화내용
-  // 입찰가 등록시 : 웹소켓으로 보내기.
-  // 입찰버튼컴포넌트 : 따로 뺄수있을까? 실시간 최고가, 실시간 입찰자, 순위 필요
+  const {
+    data: room,
+    isPending: isRoomPending,
+    isError: isRoomError,
+  } = useChatRoomQuery(roomId, canEnterRoom);
+  const {
+    data: messageHistory,
+    isPending: isMessagesPending,
+    isError: isMessagesError,
+  } = useChatMessagesQuery(roomId, canEnterRoom);
+
+  if (!roomId || (isAxiosError(accessError) && accessError.response?.status === 403)) {
+    toast.error("입찰방에 입장할 권한이 없습니다.");
+    navigate(-1);
+
+    return;
+  }
+
+  if (isAccessPending || (canEnterRoom && (isRoomPending || isMessagesPending))) {
+    return <div className="py-[10rem] text-center">입찰방 정보를 불러오는 중...</div>;
+  }
+
+  if (accessError || !canEnterRoom || isRoomError || isMessagesError || !room || !messageHistory) {
+    return <div className="py-[10rem] text-center">입찰방 정보를 불러오지 못했습니다.</div>;
+  }
+
+  const { product, auction } = room;
+  const { messages } = messageHistory;
 
   return (
     <article className="bg-white">
@@ -72,31 +106,34 @@ const BiddingRoom = () => {
           </div>
 
           <div className="mt-[2.4rem] flex flex-1 flex-col">
-            {/* 다른 사용자 입찰 */}
-            <div>
-              <div className="inline-flex rounded-[1.4rem] border border-[#E3E2DD] bg-white px-[1.6rem] py-[1.3rem] text-[1.4rem]">
-                user02님이&nbsp;
-                <strong className="text-primary">730,000원</strong>
-                으로 입찰했어요
-              </div>
+            {messages.map((message) => {
+              const amount = Number(message.content);
+              const isBidAmount = Number.isFinite(amount);
 
-              <p className="mt-[.7rem] text-[1.1rem] text-[#A5A9B0]">10:31</p>
-            </div>
+              return (
+                <div key={message.id} className="mb-[1.5rem]">
+                  <div className="inline-flex rounded-[1.4rem] border border-[#E3E2DD] bg-white px-[1.6rem] py-[1.3rem] text-[1.4rem]">
+                    {isBidAmount ? (
+                      <>
+                        {message.senderName}님이&nbsp;
+                        <strong className="text-primary">{amount.toLocaleString()}원</strong>
+                        으로 입찰했어요
+                      </>
+                    ) : (
+                      message.content
+                    )}
+                  </div>
 
-            <div className="mt-[1.5rem]">
-              <div className="h-[6rem] w-[28rem] rounded-[1.4rem] border border-[#E3E2DD] bg-white" />
-
-              <p className="mt-[.7rem] text-[1.1rem] text-[#A5A9B0]">10:32</p>
-            </div>
-
-            <div className="flex flex-col items-end">
-              <div className="bg-primary rounded-[1.4rem] rounded-br-[.4rem] px-[1.6rem] py-[1.3rem] text-[1.4rem] text-white">
-                <strong className="underline">750,000원</strong>
-                &nbsp;으로 입찰했어요
-              </div>
-
-              <p className="mt-[.7rem] text-[1.1rem] text-[#A5A9B0]">10:33</p>
-            </div>
+                  <p className="mt-[.7rem] text-[1.1rem] text-[#A5A9B0]">
+                    {new Date(message.createDate).toLocaleTimeString("ko-KR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </section>
 

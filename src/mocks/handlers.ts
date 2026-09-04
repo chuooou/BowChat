@@ -230,11 +230,11 @@ export const handlers = [
     return HttpResponse.json({
       roomId: Number(params.roomId),
       roomType: "AUCTION" as const,
-      roomName: "아이패드 프로 11인치 · 입찰방",
+      roomName: "아이패드 프로 11인치",
       product: {
         productId: 1,
         name: "아이패드 프로 11인치",
-        imageUrl: "https://placehold.co/80x80",
+        imageUrl: "https://dimg.donga.com/wps/NEWS/IMAGE/2024/07/04/125768056.1.jpg",
         endAt: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
       },
       auction: {
@@ -262,6 +262,32 @@ export const handlers = [
           createdAt: "2026-09-04T10:33:00+09:00",
         },
       ],
+    });
+  }),
+
+  http.get("*/api/chat/rooms/:roomId/access", async ({ params, request }) => {
+    await delay(400);
+
+    const authorization = request.headers.get("Authorization");
+    const roomId = Number(params.roomId);
+
+    if (!authorization?.startsWith("Bearer ") || !authorization.slice(7).trim()) {
+      return HttpResponse.json({ message: "로그인이 필요합니다." }, { status: 401 });
+    }
+
+    // 임의로 방번호로 에러처리
+    if (roomId !== 100) {
+      return HttpResponse.json(
+        {
+          canEnter: false,
+          message: "입찰방에 입장할 권한이 없습니다.",
+        },
+        { status: 403 },
+      );
+    }
+
+    return HttpResponse.json({
+      canEnter: true,
     });
   }),
 
