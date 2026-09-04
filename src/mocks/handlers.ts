@@ -218,6 +218,86 @@ export const handlers = [
     );
   }),
 
+  http.get("*/api/chat/rooms/:roomId", async ({ params, request }) => {
+    await delay(400);
+
+    const authorization = request.headers.get("Authorization");
+
+    if (!authorization?.startsWith("Bearer ") || !authorization.slice(7).trim()) {
+      return HttpResponse.json({ message: "로그인이 필요합니다." }, { status: 401 });
+    }
+
+    return HttpResponse.json({
+      roomId: Number(params.roomId),
+      roomType: "AUCTION" as const,
+      roomName: "아이패드 프로 11인치 · 입찰방",
+      product: {
+        productId: 1,
+        name: "아이패드 프로 11인치",
+        imageUrl: "https://placehold.co/80x80",
+        endAt: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
+      },
+      auction: {
+        highestBid: 750000,
+        highestBidder: "user01",
+        participantCount: 6,
+        myRank: 1,
+        isHighestBidder: true,
+      },
+      messages: [
+        {
+          id: "6610f8f86a4d632b52f68cb1",
+          senderId: 7,
+          senderName: "user02",
+          amount: 730000,
+          messageType: "AUCTION_BID" as const,
+          createdAt: "2026-09-04T10:31:00+09:00",
+        },
+        {
+          id: "6610f90a6a4d632b52f68cb2",
+          senderId: 1,
+          senderName: "츄츄",
+          amount: 750000,
+          messageType: "AUCTION_BID" as const,
+          createdAt: "2026-09-04T10:33:00+09:00",
+        },
+      ],
+    });
+  }),
+
+  http.get("*/api/chat/messages/:roomId", async ({ request }) => {
+    await delay(400);
+
+    const authorization = request.headers.get("Authorization");
+
+    if (!authorization?.startsWith("Bearer ") || !authorization.slice(7).trim()) {
+      return HttpResponse.json({ status: 401 });
+    }
+
+    return HttpResponse.json({
+      messages: [
+        {
+          id: "6610f8f86a4d632b52f68cb1",
+          roomId: 100,
+          senderId: 4,
+          senderName: "츄츄",
+          content: "730000",
+          messageType: "AUCTION_BID",
+          createDate: "2026-09-04T14:10:00",
+        },
+        {
+          id: "6610f90a6a4d632b52f68cb2",
+          roomId: 100,
+          senderId: 7,
+          senderName: "판매자",
+          content: "네, 안녕하세요!",
+          messageType: "AUCTION_BID",
+          createDate: "2026-09-04T14:11:20",
+        },
+      ],
+    });
+  }),
+
   http.get("*/user/check-email", async ({ request }) => {
     await delay(400);
 

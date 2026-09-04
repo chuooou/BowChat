@@ -16,6 +16,11 @@ const BiddingRoom = () => {
     isHighestBidder: true,
   };
 
+  // 상품명, 시간, 사진은 밖에서 가져오면 됨
+  // 입장하자마자 : 현재 최고가, 이전 대화내용
+  // 입찰가 등록시 : 웹소켓으로 보내기.
+  // 입찰버튼컴포넌트 : 따로 뺄수있을까? 실시간 최고가, 실시간 입찰자, 순위 필요
+
   return (
     <article className="bg-white">
       <section className="bg-dark flex items-center justify-between px-[3rem] py-[1.8rem] text-white">
@@ -32,9 +37,9 @@ const BiddingRoom = () => {
 
             <div className="text-light-gray mt-[.5rem] flex items-center gap-[.8rem] text-[1.15rem]">
               <span className="inline-flex items-center gap-[.5rem]">
-                <span className="relative inline-flex size-[.7rem]">
+                <span className="relative mr-[.3rem] inline-flex size-[1rem]">
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-500 opacity-75" />
-                  <span className="relative inline-flex size-[.7rem] rounded-full bg-red-500" />
+                  <span className="relative inline-flex size-[1rem] rounded-full bg-red-500" />
                 </span>
                 LIVE
               </span>
@@ -42,7 +47,7 @@ const BiddingRoom = () => {
               <span>·</span>
 
               <span>
-                마감 <Countdown endAt={product.endAt} />
+                마감 <Countdown targetDate={product.endAt} />
               </span>
             </div>
           </div>
@@ -60,9 +65,7 @@ const BiddingRoom = () => {
         </div>
       </section>
 
-      {/* 입찰방 본문 */}
       <div className="flex min-h-[56rem]">
-        {/* 실시간 입찰 로그 */}
         <section className="flex flex-1 flex-col bg-[#FCFCFA] px-[3rem] py-[2.6rem]">
           <div className="rounded-[1.3rem] bg-[#F1F0EC] px-[1.6rem] py-[1.5rem] text-[1.2rem] text-[#69707D]">
             🔒 입찰방에서는 자유로운 대화 없이 입찰가 등록만 가능해요.
@@ -80,15 +83,13 @@ const BiddingRoom = () => {
               <p className="mt-[.7rem] text-[1.1rem] text-[#A5A9B0]">10:31</p>
             </div>
 
-            {/* 예시 로그 */}
             <div className="mt-[1.5rem]">
               <div className="h-[6rem] w-[28rem] rounded-[1.4rem] border border-[#E3E2DD] bg-white" />
 
               <p className="mt-[.7rem] text-[1.1rem] text-[#A5A9B0]">10:32</p>
             </div>
 
-            {/* 내 입찰 */}
-            <div className="mt-auto flex flex-col items-end">
+            <div className="flex flex-col items-end">
               <div className="bg-primary rounded-[1.4rem] rounded-br-[.4rem] px-[1.6rem] py-[1.3rem] text-[1.4rem] text-white">
                 <strong className="underline">750,000원</strong>
                 &nbsp;으로 입찰했어요
