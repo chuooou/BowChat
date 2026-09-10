@@ -1,5 +1,7 @@
 import { delay, http, HttpResponse, ws } from "msw";
 
+import type { ChatMessagesResponse } from "@/features/chat/api/chatApi";
+
 const duplicatedEmails = ["test@example.com", "admin@example.com"];
 const duplicatedNicknames = ["관리자", "테스트"];
 
@@ -13,6 +15,140 @@ type CreateProductRequest = {
 
 type EnterChatRoomRequest =
   { roomType: "DIRECT" | "AUCTION"; productId: number } | { roomType: "GROUP"; roomName: string };
+
+const mockCurrentUser = { id: 1, email: "test@example.com", nickname: "츄츄" };
+
+type ChatMockState = {
+  highestBid: number;
+  highestBidder: string;
+  messages: ChatMessagesResponse["messages"];
+};
+
+const rooms = new Map<string, ChatMockState>();
+
+const getChatMockState = (roomId: string): ChatMockState => {
+  const existing = rooms.get(roomId);
+  if (existing) return existing;
+
+  const state: ChatMockState = {
+    highestBid: 750000,
+    highestBidder: mockCurrentUser.nickname,
+    messages: [
+      {
+        id: "6610f8f86a4d632b52f68cb1",
+        roomId: Number(roomId),
+        senderId: 7,
+        senderName: "user02",
+        content: "730000",
+        messageType: "AUCTION_BID",
+        createDate: "2026-09-04T10:31:00+09:00",
+      },
+      {
+        id: "6610f90a6a4d632b52f68cb2",
+        roomId: Number(roomId),
+        senderId: mockCurrentUser.id,
+        senderName: mockCurrentUser.nickname,
+        content: "750000",
+        messageType: "AUCTION_BID",
+        createDate: "2026-09-04T10:33:00+09:00",
+      },
+    ],
+  };
+  rooms.set(roomId, state);
+  return state;
+};
+
+const chatSocket = ws.link("*/ws/chat/:roomId");
+const roomClients = new Map<string, Set<Client>>();
+type Client = typeof chatSocket.clients extends Set<infer T> ? T : never;
+
+const chatSocketHandler = chatSocket.addEventListener("connection", ({ client, params }) => {
+  const roomId = String(params.roomId);
+  const state = getChatMockState(roomId);
+  const clients = roomClients.get(roomId) ?? new Set<Client>();
+  roomClients.set(roomId, clients);
+  clients.add(client);
+
+  client.addEventListener("close", () => {
+    clients.delete(client);
+    if (clients.size === 0) roomClients.delete(roomId);
+  });
+
+  client.addEventListener("message", (event) => {
+    let requestId = "";
+    const reject = (reason: string) =>
+      client.send(
+        JSON.stringify({
+          type: "BID_REJECTED",
+          requestId,
+          roomId,
+          reason,
+          currentHighestBid: state.highestBid,
+        }),
+      );
+
+    let payload: unknown;
+    try {
+      if (typeof event.data !== "string") {
+        reject("JSON 문자열을 보내주세요.");
+        return;
+      }
+      payload = JSON.parse(event.data);
+    } catch {
+      reject("올바른 JSON 형식이 아닙니다.");
+      return;
+    }
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      reject("올바른 입찰 요청이 아닙니다.");
+      return;
+    }
+    const bid = payload as Record<string, unknown>;
+    if (typeof bid.requestId === "string") requestId = bid.requestId;
+    if (bid.type !== "PLACE_BID") {
+      reject("지원하지 않는 메시지 타입입니다.");
+      return;
+    }
+    if (!requestId.trim()) {
+      reject("requestId가 필요합니다.");
+      return;
+    }
+    if (bid.roomId !== roomId) {
+      reject("입찰방 정보가 일치하지 않습니다.");
+      return;
+    }
+    if (typeof bid.amount !== "number" || !Number.isFinite(bid.amount) || bid.amount <= 0) {
+      reject("유효한 양수 입찰 금액을 입력해주세요.");
+      return;
+    }
+    if (bid.amount <= state.highestBid) {
+      reject("현재 최고 입찰가보다 높은 금액을 입력해주세요.");
+      return;
+    }
+
+    const message: (typeof state.messages)[number] = {
+      id: crypto.randomUUID(),
+      roomId: Number(roomId),
+      senderId: mockCurrentUser.id,
+      senderName: mockCurrentUser.nickname,
+      content: String(bid.amount),
+      messageType: "AUCTION_BID",
+      createDate: new Date().toISOString(),
+    };
+    state.highestBid = bid.amount;
+    state.highestBidder = mockCurrentUser.nickname;
+    state.messages.push(message);
+
+    const response = JSON.stringify({
+      type: "BID_PLACED",
+      requestId,
+      roomId,
+      highestBid: state.highestBid,
+      highestBidder: state.highestBidder,
+      message,
+    });
+    for (const roomClient of clients) roomClient.send(response);
+  });
+});
 
 const productAuctionSocket = ws.link("*/ws/products/:productId");
 
@@ -75,6 +211,7 @@ const productAuctionSocketHandler = productAuctionSocket.addEventListener(
 
 export const handlers = [
   productAuctionSocketHandler,
+  chatSocketHandler,
 
   http.get("*/auth/me", async ({ request }) => {
     await delay(400);
@@ -85,11 +222,7 @@ export const handlers = [
       return HttpResponse.json({ message: "액세스 토큰이 필요합니다." }, { status: 401 });
     }
 
-    return HttpResponse.json({
-      id: 1,
-      email: "test@example.com",
-      nickname: "츄츄",
-    });
+    return HttpResponse.json(mockCurrentUser);
   }),
 
   // http.post("*/auth/login", async ({ request }) => {
@@ -227,6 +360,8 @@ export const handlers = [
       return HttpResponse.json({ message: "로그인이 필요합니다." }, { status: 401 });
     }
 
+    const state = getChatMockState(String(params.roomId));
+
     return HttpResponse.json({
       roomId: Number(params.roomId),
       roomType: "AUCTION" as const,
@@ -238,30 +373,20 @@ export const handlers = [
         endAt: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
       },
       auction: {
-        highestBid: 750000,
-        highestBidder: "user01",
+        highestBid: state.highestBid,
+        highestBidder: state.highestBidder,
         participantCount: 6,
         myRank: 1,
         isHighestBidder: true,
       },
-      messages: [
-        {
-          id: "6610f8f86a4d632b52f68cb1",
-          senderId: 7,
-          senderName: "user02",
-          amount: 730000,
-          messageType: "AUCTION_BID" as const,
-          createdAt: "2026-09-04T10:31:00+09:00",
-        },
-        {
-          id: "6610f90a6a4d632b52f68cb2",
-          senderId: 1,
-          senderName: "츄츄",
-          amount: 750000,
-          messageType: "AUCTION_BID" as const,
-          createdAt: "2026-09-04T10:33:00+09:00",
-        },
-      ],
+      messages: state.messages.map((message) => ({
+        id: message.id,
+        senderId: message.senderId,
+        senderName: message.senderName,
+        amount: Number(message.content),
+        messageType: message.messageType,
+        createdAt: message.createDate,
+      })),
     });
   }),
 
@@ -291,7 +416,7 @@ export const handlers = [
     });
   }),
 
-  http.get("*/api/chat/messages/:roomId", async ({ request }) => {
+  http.get("*/api/chat/messages/:roomId", async ({ params, request }) => {
     await delay(400);
 
     const authorization = request.headers.get("Authorization");
@@ -301,26 +426,7 @@ export const handlers = [
     }
 
     return HttpResponse.json({
-      messages: [
-        {
-          id: "6610f8f86a4d632b52f68cb1",
-          roomId: 100,
-          senderId: 4,
-          senderName: "츄츄",
-          content: "730000",
-          messageType: "AUCTION_BID",
-          createDate: "2026-09-04T14:10:00",
-        },
-        {
-          id: "6610f90a6a4d632b52f68cb2",
-          roomId: 100,
-          senderId: 7,
-          senderName: "판매자",
-          content: "네, 안녕하세요!",
-          messageType: "AUCTION_BID",
-          createDate: "2026-09-04T14:11:20",
-        },
-      ],
+      messages: getChatMockState(String(params.roomId)).messages,
     });
   }),
 

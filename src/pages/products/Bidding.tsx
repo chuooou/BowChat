@@ -1,10 +1,12 @@
 import { isAxiosError } from "axios";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { useChatMessagesQuery } from "@/features/chat/api/useChatMessagesQuery";
 import { useChatRoomAccessQuery } from "@/features/chat/api/useChatRoomAccessQuery";
 import { useChatRoomQuery } from "@/features/chat/api/useChatRoomQuery";
+import { useBiddingRoomSocket } from "@/features/chat/model/useBiddingRoomSocket";
 import Countdown from "@/features/products/detail/ui/Countdown";
 import { Button } from "@/shared/ui/Button";
 
@@ -24,6 +26,7 @@ const BiddingRoom = () => {
     error: accessError,
     isPending: isAccessPending,
   } = useChatRoomAccessQuery(roomId ?? "", isValidRoomId);
+
   const canEnterRoom = access?.canEnter === true;
 
   const {
@@ -31,17 +34,31 @@ const BiddingRoom = () => {
     isPending: isRoomPending,
     isError: isRoomError,
   } = useChatRoomQuery(roomId, canEnterRoom);
+
   const {
     data: messageHistory,
     isPending: isMessagesPending,
     isError: isMessagesError,
   } = useChatMessagesQuery(roomId, canEnterRoom);
 
-  if (!roomId || (isAxiosError(accessError) && accessError.response?.status === 403)) {
-    toast.error("입찰방에 입장할 권한이 없습니다.");
-    navigate(-1);
+  const socketEnabled = canEnterRoom && !!room && !!messageHistory;
 
-    return;
+  const { isConnected, isBidPending, sendBid } = useBiddingRoomSocket({
+    roomId: roomId ?? "",
+    enabled: socketEnabled,
+  });
+
+  const isForbidden = isAxiosError(accessError) && accessError.response?.status === 403;
+
+  useEffect(() => {
+    if (!roomId || isForbidden) {
+      toast.error("입찰방에 입장할 권한이 없습니다.");
+      navigate(-1);
+    }
+  }, [roomId, isForbidden, navigate]);
+
+  if (!roomId || isForbidden) {
+    return null;
   }
 
   if (isAccessPending || (canEnterRoom && (isRoomPending || isMessagesPending))) {
