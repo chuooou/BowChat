@@ -16,13 +16,10 @@ BowChat은 중고·리셀 상품을 **실시간 입찰 방식으로 거래하는
 
 ## Preview
 
-> 실제 구현 화면과 실시간 입찰 Demo는 개발 진행에 따라 추가할 예정입니다.
+![상품 상세](/src/docs/images/product-detail.png)
+![실시간 입찰](/src/docs/images/product-room.png)
 
-[상품 상세](/src/docs/images/product-detail.png)
-[실시간 입찰](/src/docs/images/product-detail.png)
-<!-- 예시
-![실시간 입찰 Demo](./docs/images/auction-demo.gif)
--->
+> 개발 진행에 따라 주요 화면 스냅샷을 더 추가할 예정입니다.
 
 ---
 
