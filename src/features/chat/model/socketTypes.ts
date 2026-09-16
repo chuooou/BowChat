@@ -27,4 +27,20 @@ export type BidRejectedMessage = {
   currentHighestBid: number;
 };
 
+export type ChatRoomResponse = {
+  product: {
+    name: string;
+    imageUrl: string;
+    endAt: string;
+  };
+
+  auction: {
+    highestBid: number;
+    highestBidder: string;
+    participantCount: number;
+    myRank: number;
+    isHighestBidder: boolean;
+  };
+};
+
 export type BiddingRoomSocketMessage = BidPlacedMessage | BidRejectedMessage;

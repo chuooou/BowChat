@@ -4,7 +4,11 @@ import { toast } from "sonner";
 
 import type { ChatMessagesResponse } from "@/features/chat/api/chatApi";
 import { chatQueryKeys } from "@/features/chat/api/chatQueryKeys";
-import type { BiddingRoomSocketMessage, PlaceBidMessage } from "@/features/chat/model/socketTypes";
+import type {
+  BiddingRoomSocketMessage,
+  ChatRoomResponse,
+  PlaceBidMessage,
+} from "@/features/chat/model/socketTypes";
 
 type UseBiddingRoomSocketParams = {
   roomId: string;

@@ -59,24 +59,169 @@ const getChatMockState = (roomId: string): ChatMockState => {
 };
 
 const chatSocket = ws.link("*/ws/chat/:roomId");
-const roomClients = new Map<string, Set<Client>>();
+
 type Client = typeof chatSocket.clients extends Set<infer T> ? T : never;
+
+const roomClients = new Map<string, Set<Client>>();
+
+const roomBidTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+const MOCK_BIDDERS = [
+  {
+    id: 7,
+    nickname: "user02",
+  },
+  {
+    id: 8,
+    nickname: "당근",
+  },
+  {
+    id: 9,
+    nickname: "아이패드좋아",
+  },
+  {
+    id: 10,
+    nickname: "왈왈",
+  },
+] as const;
+
+const BID_INCREMENTS = [1000, 5000, 10000] as const;
+
+type BroadcastBidParams = {
+  roomId: string;
+  bidderId: number;
+  bidderNickname: string;
+  amount: number;
+  requestId: string;
+};
+
+const broadcastBidPlaced = ({
+  roomId,
+  bidderId,
+  bidderNickname,
+  amount,
+  requestId,
+}: BroadcastBidParams) => {
+  const state = getChatMockState(roomId);
+
+  const message: (typeof state.messages)[number] = {
+    id: crypto.randomUUID(),
+    roomId: Number(roomId),
+    senderId: bidderId,
+    senderName: bidderNickname,
+    content: String(amount),
+    messageType: "AUCTION_BID",
+    createDate: new Date().toISOString(),
+  };
+
+  // 현재 경매 상태 변경
+  state.highestBid = amount;
+  state.highestBidder = bidderNickname;
+
+  // 이전 메시지 조회 REST와도 상태 공유
+  state.messages.push(message);
+
+  const response = JSON.stringify({
+    type: "BID_PLACED",
+    requestId,
+    roomId,
+    highestBid: state.highestBid,
+    highestBidder: state.highestBidder,
+    message,
+  });
+
+  const clients = roomClients.get(roomId);
+
+  if (!clients) return;
+
+  // 같은 입찰방에 접속한 모든 client에게 전송
+  for (const roomClient of clients) {
+    roomClient.send(response);
+  }
+};
+
+const scheduleNextMockBid = (roomId: string) => {
+  // 이미 다음 가짜 입찰이 예약돼 있으면 중복 생성 방지
+  if (roomBidTimers.has(roomId)) {
+    return;
+  }
+
+  // 4~8초 사이에 다른 사용자가 입찰
+  const delayMs = 4000 + Math.floor(Math.random() * 4000);
+
+  const timer = setTimeout(() => {
+    roomBidTimers.delete(roomId);
+
+    const clients = roomClients.get(roomId);
+
+    // 입찰방에 아무도 없으면 simulation 종료
+    if (!clients || clients.size === 0) {
+      return;
+    }
+
+    const state = getChatMockState(roomId);
+
+    // 현재 최고입찰자는 연속으로 다시 입찰하지 않도록 제외
+    const candidates = MOCK_BIDDERS.filter((bidder) => bidder.nickname !== state.highestBidder);
+
+    const bidder = candidates[Math.floor(Math.random() * candidates.length)];
+
+    const increment = BID_INCREMENTS[Math.floor(Math.random() * BID_INCREMENTS.length)];
+
+    broadcastBidPlaced({
+      roomId,
+      bidderId: bidder.id,
+      bidderNickname: bidder.nickname,
+
+      // 항상 현재 최고가보다 높게 입찰
+      amount: state.highestBid + increment,
+
+      // 내 PLACE_BID requestId와 구분
+      requestId: `mock-${crypto.randomUUID()}`,
+    });
+
+    // 다음 가짜 입찰 계속 예약
+    scheduleNextMockBid(roomId);
+  }, delayMs);
+
+  roomBidTimers.set(roomId, timer);
+};
 
 const chatSocketHandler = chatSocket.addEventListener("connection", ({ client, params }) => {
   const roomId = String(params.roomId);
+
   const state = getChatMockState(roomId);
+
   const clients = roomClients.get(roomId) ?? new Set<Client>();
+
   roomClients.set(roomId, clients);
+
   clients.add(client);
+
+  // 입찰방 연결되면 가짜 실시간 입찰 시작
+  scheduleNextMockBid(roomId);
 
   client.addEventListener("close", () => {
     clients.delete(client);
-    if (clients.size === 0) roomClients.delete(roomId);
+
+    // 해당 입찰방에 아무도 없으면 timer 정리
+    if (clients.size === 0) {
+      roomClients.delete(roomId);
+
+      const timer = roomBidTimers.get(roomId);
+
+      if (timer) {
+        clearTimeout(timer);
+
+        roomBidTimers.delete(roomId);
+      }
+    }
   });
 
   client.addEventListener("message", (event) => {
     let requestId = "";
-    const reject = (reason: string) =>
+
+    const reject = (reason: string) => {
       client.send(
         JSON.stringify({
           type: "BID_REJECTED",
@@ -86,67 +231,77 @@ const chatSocketHandler = chatSocket.addEventListener("connection", ({ client, p
           currentHighestBid: state.highestBid,
         }),
       );
+    };
 
     let payload: unknown;
+
     try {
       if (typeof event.data !== "string") {
         reject("JSON 문자열을 보내주세요.");
+
         return;
       }
+
       payload = JSON.parse(event.data);
     } catch {
       reject("올바른 JSON 형식이 아닙니다.");
+
       return;
     }
+
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       reject("올바른 입찰 요청이 아닙니다.");
+
       return;
     }
+
     const bid = payload as Record<string, unknown>;
-    if (typeof bid.requestId === "string") requestId = bid.requestId;
+
+    if (typeof bid.requestId === "string") {
+      requestId = bid.requestId;
+    }
+
     if (bid.type !== "PLACE_BID") {
       reject("지원하지 않는 메시지 타입입니다.");
+
       return;
     }
+
     if (!requestId.trim()) {
       reject("requestId가 필요합니다.");
+
       return;
     }
+
     if (bid.roomId !== roomId) {
       reject("입찰방 정보가 일치하지 않습니다.");
+
       return;
     }
+
     if (typeof bid.amount !== "number" || !Number.isFinite(bid.amount) || bid.amount <= 0) {
       reject("유효한 양수 입찰 금액을 입력해주세요.");
+
       return;
     }
+
     if (bid.amount <= state.highestBid) {
       reject("현재 최고 입찰가보다 높은 금액을 입력해주세요.");
+
       return;
     }
 
-    const message: (typeof state.messages)[number] = {
-      id: crypto.randomUUID(),
-      roomId: Number(roomId),
-      senderId: mockCurrentUser.id,
-      senderName: mockCurrentUser.nickname,
-      content: String(bid.amount),
-      messageType: "AUCTION_BID",
-      createDate: new Date().toISOString(),
-    };
-    state.highestBid = bid.amount;
-    state.highestBidder = mockCurrentUser.nickname;
-    state.messages.push(message);
-
-    const response = JSON.stringify({
-      type: "BID_PLACED",
-      requestId,
+    // ⭐ 내가 입찰한 경우
+    //
+    // highestBidder가 "츄츄"로 변경되고
+    // 같은 입찰방 전체에 BID_PLACED 전달
+    broadcastBidPlaced({
       roomId,
-      highestBid: state.highestBid,
-      highestBidder: state.highestBidder,
-      message,
+      bidderId: mockCurrentUser.id,
+      bidderNickname: mockCurrentUser.nickname,
+      amount: bid.amount,
+      requestId,
     });
-    for (const roomClient of clients) roomClient.send(response);
   });
 });
 
@@ -225,22 +380,22 @@ export const handlers = [
     return HttpResponse.json(mockCurrentUser);
   }),
 
-  // http.post("*/auth/login", async ({ request }) => {
-  //   await delay(400);
+  http.post("*/auth/login", async ({ request }) => {
+    await delay(400);
 
-  //   const { autoLogin } = (await request.json()) as { autoLogin: boolean };
+    const { autoLogin } = (await request.json()) as { autoLogin: boolean };
 
-  //   return HttpResponse.json({
-  //     accessToken: "mock-access-token",
-  //     refreshToken: "mock-refresh-token",
-  //     refreshTokenExpiresIn: 60 * 60 * 24 * (autoLogin ? 7 : 1),
-  //     userInfo: {
-  //       id: 1,
-  //       email: "test@example.com",
-  //       nickname: "보경츄츄",
-  //     },
-  //   });
-  // }),
+    return HttpResponse.json({
+      accessToken: "mock-access-token",
+      refreshToken: "mock-refresh-token",
+      refreshTokenExpiresIn: 60 * 60 * 24 * (autoLogin ? 7 : 1),
+      userInfo: {
+        id: 1,
+        email: "test@example.com",
+        nickname: "보경츄츄",
+      },
+    });
+  }),
 
   // 토큰 재발급 성공 응답
   http.post("*/auth/refresh", async () => {
